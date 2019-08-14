@@ -11,12 +11,13 @@ const (
 )
 
 type Client struct {
-	UserInfo   *GetUserInfoResult
-	ApiVersion string
-	ServerUrl  string
-	LoginUrl   string
-	soapClient *Soap
-	sessionId  string
+	UserInfo    *GetUserInfoResult
+	ApiVersion  string
+	ServerUrl   string
+	LoginUrl    string
+	soapClient  *Soap
+	sessionId   string
+	credentials *Login
 }
 
 func NewClient() *Client {
@@ -63,12 +64,33 @@ func (c *Client) SetGzip(gz bool) {
 	c.soapClient.SetGzip(gz)
 }
 
+func (c *Client) GetSessionID() string {
+	return c.sessionId
+}
+
+func (c *Client) RefreshSessionID() (err error) {
+	var res *LoginResponse
+	if res, err = c.soapClient.Login(c.credentials); err != nil {
+		return
+	}
+
+	c.sessionId = res.Result.SessionId
+	c.ServerUrl = res.Result.ServerUrl
+	c.soapClient.SetServerUrl(res.Result.ServerUrl)
+	c.UserInfo = res.Result.UserInfo
+	sessionHeader := &SessionHeader{
+		SessionId: res.Result.SessionId,
+	}
+	c.soapClient.AddHeader(&sessionHeader)
+	return
+}
+
 func (c *Client) Login(u string, p string) (*LoginResult, error) {
-	req := &Login{
+	c.credentials = &Login{
 		Username: u,
 		Password: p,
 	}
-	res, err := c.soapClient.Login(req)
+	res, err := c.soapClient.Login(c.credentials)
 	if err != nil {
 		return nil, err
 	}
