@@ -72,6 +72,16 @@ func queryMore(ql string) string {
 	return res.QueryLocator
 }
 
+func aggregate() string {
+	client.SetBatchSize(200)
+	res, err := client.Query("SELECT Account.Name, COUNT(Id) FROM Contact GROUP BY Account.Name")
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+	return res.QueryLocator
+}
+
 func create() {
 	sobjects := []*soapforce.SObject{
 		{
@@ -148,4 +158,25 @@ func undelete() {
 	}
 	pp.Print(sResult)
 
+}
+
+func login() {
+	client := soapforce.NewClient()
+	client.SetClientId(os.Getenv("SALESFORCE_CLIENT_ID"))
+	client.SetClientSecret(os.Getenv("SALESFORCE_CLIENT_SECRET"))
+	client.SetDebug(true)
+	err := client.LoginWithOAuth(os.Getenv("SALESFORCE_USERNAME"), os.Getenv("SALESFORCE_PASSWORD"))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func refresh() {
+	client := soapforce.NewClient()
+	client.SetClientId(os.Getenv("SALESFORCE_CLIENT_ID"))
+	client.SetClientSecret(os.Getenv("SALESFORCE_CLIENT_SECRET"))
+	err := client.Refresh(os.Getenv("REFRESH_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
 }

@@ -31,7 +31,7 @@ import:
 	go get golang.org/x/tools/cmd/goimports
 
 .PHONY: cross-build
-cross-build: deps
+cross-build:
 	-@goimports -w $(SRCS)
 	@gofmt -w $(SRCS)
 	@for os in darwin linux windows; do \
@@ -40,16 +40,6 @@ cross-build: deps
 	        -installsuffix netgo $(LDFLAGS) -o dist/$$os-$$arch/$(NAME); \
 	    done; \
 	done
-
-.PHONY: glide
-glide:
-ifeq ($(shell command -v glide 2> /dev/null),)
-	curl https://glide.sh/get | sh
-endif
-
-.PHONY: deps
-deps: glide
-	glide install
 
 .PHONY: bin/$(NAME) 
 bin/$(NAME): $(SRCS)
@@ -67,3 +57,6 @@ dist:
 docker-build:
 	docker build . -t $(NAME)
 
+.PHONY: run
+run:
+	go run salesforce/main.go
