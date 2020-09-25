@@ -23,8 +23,10 @@ type Client struct {
 	LoginUrl        string
 	ClientID        string
 	ClientSecret    string
+	ServerUrl		string
+
 	soapClient      *Soap
-  credentials *Login
+	credentials     *Login
 }
 
 func NewClient() *Client {
@@ -73,7 +75,7 @@ func (c *Client) SetGzip(gz bool) {
 }
 
 func (c *Client) GetSessionID() string {
-	return c.sessionId
+	return c.SessionId
 }
 
 func (c *Client) RefreshSessionID() (err error) {
@@ -82,7 +84,7 @@ func (c *Client) RefreshSessionID() (err error) {
 		return
 	}
 
-	c.sessionId = res.Result.SessionId
+	c.SessionId = res.Result.SessionId
 	c.ServerUrl = res.Result.ServerUrl
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
 	c.UserInfo = res.Result.UserInfo
